@@ -18,7 +18,6 @@ exports.handler = async (event) => {
     console.log(event);
     const {
         headers,
-        pathParameters,
         requestContext
     } = event;
 

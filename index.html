@@ -1,0 +1,191 @@
+<html>
+    <head>
+        <meta name="viewport" content="height=device-height, width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=5.0">
+        <meta charset="utf8">
+        <title>Clarissa & Crispin's Wedding QuizHunt</title>
+        <script>
+            function onUpdate(fromThisPage) {
+                const data = window.quizHunt;
+                let existingAnswers;
+
+                try {
+                    existingAnswers = window.localStorage.getItem("cc-wedding-quizhunt");
+                } catch {
+                    // do nothing
+                }
+                const queryParams = new URLSearchParams(window.location.search);
+                const questionIndex = parseInt(queryParams.get("question") || "1") - 1;
+
+                if (existingAnswers && !existingAnswers.includes("❔")) {
+                    // answered every question
+                    const correct = existingAnswers.split("").reduce((acc, char) => acc += (char === "✅" ? 1 : 0), 0);
+                    const total = existingAnswers.split("").length;
+                    document.getElementById("message").style.display = "flex";
+                    document.getElementById("message").innerText = `You've answered every question!\n\nFind the best man to submit your score!\n\n${existingAnswers.substring(0, 5)}\n${existingAnswers.substring(5)}\n\n${correct}/${total}`;
+                    document.getElementById("question-content").style.display = "none";
+
+                    return;
+                } else if (existingAnswers && existingAnswers[questionIndex] !== "❔") {
+                    // already answered this question
+                    document.getElementById("message").style.display = "flex";
+                    document.getElementById("message").innerText = fromThisPage
+                        ? `Your answer has been submitted!\n\nLook for other QR codes to answer every question.\n\n${existingAnswers.substring(0, 5)}\n${existingAnswers.substring(5)}`
+                        : `You've already answered this question!\n\nLook for other QR codes to answer every question.\n\n${existingAnswers.substring(0, 5)}\n${existingAnswers.substring(5)}`;
+                    document.getElementById("question-content").style.display = "none";
+
+                    return;
+                }
+
+                document.getElementById("message").style.display = "none";
+
+                const unshuffled = [data[questionIndex].correct, ...data[questionIndex].incorrect];
+                const shuffled = unshuffled
+                    .map(value => ({ value, sort: Math.random() }))
+                    .sort((a, b) => a.sort - b.sort)
+                    .map(({ value }) => value);
+
+                document.getElementById("question").innerText = data[questionIndex].question;
+                document.getElementById("option-1").innerText = shuffled[0];
+                document.getElementById("option-2").innerText = shuffled[1];
+                document.getElementById("option-3").innerText = shuffled[2];
+                document.getElementById("option-4").innerText = shuffled[3];
+            }
+
+            function clickChoice(buttonElement) {
+                const queryParams = new URLSearchParams(window.location.search);
+                const questionIndex = parseInt(queryParams.get("question") || "1") - 1;
+                let existingAnswers;
+
+                try {
+                    existingAnswers = window.localStorage.getItem("cc-wedding-quizhunt");
+                } catch {
+                    // do nothing
+                }
+
+                const correctAnswer = window.quizHunt[questionIndex].correct;
+
+                const newAnswers = (existingAnswers || Array(window.quizHunt.length).fill("❔").join("")).split("").reduce((acc, char, index) => {
+                    if (index !== questionIndex) {
+                        return `${acc}${char}`;
+                    }
+
+                    return `${acc}${buttonElement.innerText === correctAnswer ? "✅" : "❌"}`;
+                }, "");
+
+                try {
+                    window.localStorage.setItem("cc-wedding-quizhunt", newAnswers);
+                } catch {
+                    // do nothing
+                }
+
+                onUpdate(true);
+            }
+        </script>
+        <script>
+            window.fetch("https://4gx5kldtzk.execute-api.us-east-1.amazonaws.com/production/quizhunt?hunt=cc-wedding-quizhunt").then((response) => response.json()).then(data => {
+                window.quizHunt = data;
+                document.body.classList.remove("loading");
+
+                onUpdate(false);
+            });
+        </script>
+        <style>
+            body {
+	            background: linear-gradient(-45deg, #DAA520, #191970, #066839, #DAA520);
+	            background-size: 200% 200%;
+	            animation: opacity 2s ease, gradient 10s ease infinite;
+	            height: 100vh;
+                color: white;
+                opacity: 1;
+                margin: 0;
+            }
+
+            body.loading {
+                opacity: 0;
+            }
+
+            @keyframes gradient {
+	            0% {
+		            background-position: 0% 50%;
+	            }
+	            50% {
+		            background-position: 100% 50%;
+	            }
+	            100% {
+		            background-position: 0% 50%;
+	            }
+            }
+
+            @keyframes opacity {
+	            0% {
+		            opacity: 0;
+	            }
+	            100% {
+		            opacity: 1;
+	            }
+            }
+            
+            #message,
+            #question-content {
+                height: 100vh;
+                display: flex;
+                flex-direction: column;
+                justify-content: space-around;
+            }
+
+            #message {
+                padding: 0 30px;
+                font-size: 36px;
+                text-align: center;
+            }
+
+            h2 {
+                min-width: 300px;
+                margin: 0 auto;
+            }
+
+            .choice {
+                border: 1px solid white;
+                background-color: transparent;
+                color: white;
+                border-radius: 8px;
+                padding: 8px;
+                min-height: 60px;
+                min-width: 300px;
+                margin: 0 auto;
+            }
+
+            .choice:hover {
+                cursor: pointer;
+                background-color: rgba(255,255,255,0.2);
+            }
+
+            .loading button.choice {
+                background-color: gray;
+            }
+        </style>
+    </head>
+    <body class="loading">
+        <p id="message">
+
+        </p>
+        <div id="question-content">
+            <h2 id="question">
+                •••
+            </h2>
+            <button id="option-1" class="choice" onclick="clickChoice(this)">
+                •••
+            </button>
+            <button id="option-2" class="choice" onclick="clickChoice(this)">
+                •••
+            </button>
+            <button id="option-3" class="choice" onclick="clickChoice(this)">
+                •••
+            </button>
+            <button id="option-4" class="choice" onclick="clickChoice(this)">
+                •••
+            </button>
+            <br />
+        </div>
+    </body>
+</html>
