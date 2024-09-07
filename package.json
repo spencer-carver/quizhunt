@@ -1,0 +1,16 @@
+{
+    "name": "quizhunt",
+    "version": "1.0.0",
+    "description": "",
+    "main": "index.js",
+    "scripts": {
+        "export": "zip -r quizhunt.zip . -x \"./.git/*\"",
+        "list": "node -e \"require('./index').handler({path: '/api/blog', headers: { origin: 'https://spencer.carvers.info' }, requestContext: {} }).then(console.log);\"",
+        "get": "node -e \"require('./index').handler({path: '/api/blog', headers: { origin: 'https://spencer.carvers.info' }, requestContext: {}, pathParameters: { post: 'C&C QuizHunt' } }).then(console.log);\""
+    },
+    "author": "Spencer Carver",
+    "license": "ISC",
+    "dependencies": {
+        "googleapis": "^140.0.1"
+    }
+}
