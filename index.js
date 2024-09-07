@@ -51,8 +51,7 @@ exports.handler = async (event) => {
 
         // row 0 is the header
         // column 0 is question title
-        // column 1 is the correct answer
-        // column 2,3,4 are incorrect answers
+        // column 1-4 are the answers, the correct answer(s) are prefixed with ✅
         const quizData = data.data.sheets[0].data[0].rowData.reduce((quizData, { values }, rowIndex) => {
             if (rowIndex === 0) {
                 return quizData;
@@ -62,11 +61,14 @@ exports.handler = async (event) => {
             values.forEach(({ formattedValue }, columnIndex) => {
                 if (columnIndex === 0) {
                     questionData.question = formattedValue;
-                } else if (columnIndex === 1) {
-                    questionData.correct = formattedValue;
                 } else {
-                    questionData.incorrect = questionData.incorrect || [];
-                    questionData.incorrect.push(formattedValue);
+                    if (formattedValue.startsWith("✅")) {
+                        questionData.correct = questionData.correct || [];
+                        questionData.correct.push(formattedValue.substring(1));
+                    } else {
+                        questionData.incorrect = questionData.incorrect || [];
+                        questionData.incorrect.push(formattedValue);
+                    }
                 }
             });
 
