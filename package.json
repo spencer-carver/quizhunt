@@ -6,7 +6,8 @@
     "scripts": {
         "export": "zip -r quizhunt.zip . -x \"./.git/*\"",
         "list": "node -e \"require('./index').handler({path: '/api/blog', headers: { origin: 'https://spencer.carvers.info' }, requestContext: {} }).then(console.log);\"",
-        "get": "node -e \"require('./index').handler({path: '/api/blog', headers: { origin: 'https://spencer.carvers.info' }, requestContext: {}, pathParameters: { post: 'C&C QuizHunt' } }).then(console.log);\""
+        "get": "node -e \"require('./index').handler({path: '/api/blog', headers: { origin: 'https://spencer.carvers.info' }, requestContext: {}, pathParameters: { post: 'C&C QuizHunt' } }).then(console.log);\"",
+        "deploy": "aws lambda update-function-code --function-name QuizHunt --zip-file fileb://quizhunt.zip"
     },
     "author": "Spencer Carver",
     "license": "ISC",
